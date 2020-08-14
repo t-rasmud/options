@@ -39,6 +39,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.common.value.qual.MinLen;
+import org.checkerframework.checker.determinism.qual.*;
 
 /**
  * Generates HTML documentation of command-line options, for use in a manual or in a Javadoc class
@@ -259,7 +260,7 @@ public class OptionsDoclet {
       return false;
     }
 
-    Object[] objarray = objs.toArray();
+    @Det Object[] objarray = objs.toArray();
     Options options = new Options(objarray);
     if (options.getOptions().size() < 1) {
       System.out.println("Error: no @Option-annotated fields found");
@@ -267,7 +268,7 @@ public class OptionsDoclet {
     }
 
     OptionsDoclet o = new OptionsDoclet(root, options);
-    String[] @MinLen(1) [] rootOptions = root.options();
+    @Det String @Det [] @MinLen(1) [] rootOptions = root.options();
     o.setOptions(rootOptions);
     o.processJavadoc();
     try {
@@ -332,7 +333,7 @@ public class OptionsDoclet {
     String docFile = null;
     String outFile = null;
     for (int oi = 0; oi < options.length; oi++) {
-      String[] os = options[oi];
+      @Det String[] os = options[oi];
       String opt = os[0].toLowerCase();
       if (opt.equals("-docfile")) {
         if (hasDocFile) {
@@ -411,7 +412,7 @@ public class OptionsDoclet {
     String outFilename = null;
     File destDir = null;
     for (int oi = 0; oi < options.length; oi++) {
-      String[] os = options[oi];
+      @Det String[] os = options[oi];
       String opt = os[0].toLowerCase();
       if (opt.equals("-docfile")) {
         assert os.length == 2 : "@AssumeAssertion(value): dependent: optionLength(\"docfile\")==2";
@@ -450,6 +451,7 @@ public class OptionsDoclet {
    * @param clazz the class whose values will be created by command-line arguments
    * @return true if the class needs to be instantiated before command-line arguments are parsed
    */
+  @SuppressWarnings("determinism:method.invocation.invalid")  // Iteration over OrderNonDet collection
   private static boolean needsInstantiation(Class<?> clazz) {
     for (Field f : clazz.getDeclaredFields()) {
       if (f.isAnnotationPresent(Option.class) && !Modifier.isStatic(f.getModifiers())) {
@@ -594,7 +596,7 @@ public class OptionsDoclet {
    */
   @SuppressWarnings("ModifyCollectionInEnhancedForLoop")
   private void processEnumJavadoc(Options.OptionInfo oi) {
-    Enum<?>[] constants = (Enum<?>[]) oi.baseType.getEnumConstants();
+    @Det Enum<?>[] constants = (Enum<?>[]) oi.baseType.getEnumConstants();
     if (constants == null) {
       return;
     }
@@ -637,7 +639,7 @@ public class OptionsDoclet {
   public String optionsToHtml(int refillWidth) {
     StringJoiner b = new StringJoiner(lineSep);
 
-    ClassDoc[] classes = root.classes();
+    @Det ClassDoc[] classes = root.classes();
     if (includeClassDoc && classes.length > 0) {
       b.add(OptionsDoclet.javadocToHtml(classes[0]));
       b.add("<p>Command line options:</p>");
@@ -861,7 +863,7 @@ public class OptionsDoclet {
    */
   public static String javadocToHtml(Doc doc) {
     StringBuilder b = new StringBuilder();
-    Tag[] tags = doc.inlineTags();
+    @Det Tag[] tags = doc.inlineTags();
     for (Tag tag : tags) {
       String kind = tag.kind();
       String text = tag.text();
@@ -875,7 +877,7 @@ public class OptionsDoclet {
         }
       }
     }
-    SeeTag[] seetags = doc.seeTags();
+    @Det SeeTag[] seetags = doc.seeTags();
     if (seetags.length > 0) {
       b.append(" See: ");
       {

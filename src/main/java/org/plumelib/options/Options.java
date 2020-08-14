@@ -41,6 +41,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.checker.determinism.qual.*;
 
 /**
  * The Options class:
@@ -423,7 +424,8 @@ public class Options {
      */
     @SuppressWarnings({
       "nullness:argument.type.incompatible", // field is static when object is null
-      "interning:argument.type.incompatible" // interning is not relevant to the call
+      "interning:argument.type.incompatible", // interning is not relevant to the call
+            "determinism:assignment.type.incompatible"  // Potential true positive; defaultStr is assigned Object.toString()
     })
     OptionInfo(
         Field field,
@@ -669,6 +671,10 @@ public class Options {
    * @param usageSynopsis a synopsis of how to call your program
    * @param args the classes whose options to process
    */
+  @SuppressWarnings({"determinism:argument.type.incompatible", // Potential true positive; GerDeclaredFields returns OrderNonDet resulting in OrderNonDet printing
+          "determinism:method.invocation.invalid",
+          "determinism:nondeterministic.tostring"  // Potential true positive; Printing Object.toString()
+  })
   public Options(String usageSynopsis, @UnknownInitialization Object... args) {
 
     if (args.length == 0) {
@@ -696,7 +702,7 @@ public class Options {
       if (mainClass == Void.TYPE) {
         mainClass = clazz;
       }
-      Field[] fields = clazz.getDeclaredFields();
+      @Det Field[] fields = clazz.getDeclaredFields();
 
       for (Field f : fields) {
         try {
@@ -985,7 +991,7 @@ public class Options {
         ii++;
       }
     }
-    String[] result = nonOptions.toArray(new String[nonOptions.size()]);
+    @Det String[] result = nonOptions.toArray(new @Det String[nonOptions.size()]);
     return result;
   }
 
@@ -1005,8 +1011,8 @@ public class Options {
     // Split the args string on whitespace boundaries accounting for quoted
     // strings.
     args = args.trim();
-    List<String> argList = new ArrayList<>();
-    String arg = "";
+    @Det List<String> argList = new @Det ArrayList<>();
+    @Det String arg = "";
     for (int ii = 0; ii < args.length(); ii++) {
       char ch = args.charAt(ii);
       if ((ch == '\'') || (ch == '"')) {
@@ -1036,7 +1042,7 @@ public class Options {
       argList.add(arg);
     }
 
-    String[] argsArray = argList.toArray(new String[argList.size()]);
+    @Det String[] argsArray = argList.toArray(new @Det String[argList.size()]);
     return argsArray;
   }
 
@@ -1056,7 +1062,7 @@ public class Options {
    */
   public String[] parse(String message, String[] args) {
 
-    String[] nonOptions = null;
+    @Det String[] nonOptions = null;
 
     try {
       nonOptions = parse(args);
@@ -1087,7 +1093,7 @@ public class Options {
    */
   public String[] parse(boolean showUsageOnError, String[] args) {
 
-    String[] nonOptions = null;
+    @Det String[] nonOptions = null;
 
     try {
       nonOptions = parse(args);
@@ -1426,7 +1432,7 @@ public class Options {
         // argument value.
         if (oi.list != null) {
           if (spaceSeparatedLists) {
-            String[] aarr = argValue.split(" +");
+            @Det String[] aarr = argValue.split(" +");
             for (String aval : aarr) {
               Object val = getRefArg(oi, argName, aval);
               oi.list.add(val); // uncheck cast
@@ -1569,6 +1575,7 @@ public class Options {
    * @return a command line that can be tokenized with {@link #tokenize}, containing the current
    *     setting for each option
    */
+  @SuppressWarnings("determinism:nondeterministic.tostring")
   public String settings(boolean showUnpublicized) {
     StringJoiner out = new StringJoiner(lineSeparator);
 
@@ -1632,6 +1639,7 @@ public class Options {
      * @param args the arguments to be formatted by the format string
      */
     @FormatMethod
+    @SuppressWarnings("determinism:nondeterministic.tostring")
     public ArgException(String format, @Nullable Object... args) {
       super(String.format(format, args));
     }
