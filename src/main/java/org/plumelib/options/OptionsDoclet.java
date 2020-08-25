@@ -39,6 +39,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.common.value.qual.MinLen;
+import org.checkerframework.checker.determinism.qual.*;
+import org.checkerframework.framework.qual.HasQualifierParameter;
 
 /**
  * Generates HTML documentation of command-line options, for use in a manual or in a Javadoc class
@@ -155,6 +157,7 @@ import org.checkerframework.common.value.qual.MinLen;
 // This doesn't itself use org.plumelib.options.Options for its command-line option processing
 // because a Doclet is required to implement the optionLength() and validOptions() methods.
 @SuppressWarnings("deprecation") // JDK 9 deprecates com.sun.javadoc package
+@HasQualifierParameter(NonDet.class)
 public class OptionsDoclet {
 
   /** The system-specific line separator. */
@@ -218,8 +221,9 @@ public class OptionsDoclet {
    * @param root the root document
    * @return true if processing completed without an error
    */
+  @SuppressWarnings("determinism:argument.type.incompatible")
   public static boolean start(RootDoc root) {
-    List<Object> objs = new ArrayList<>();
+    @PolyDet List<@PolyDet("use") Object> objs = new @PolyDet ArrayList<>();
     for (ClassDoc doc : root.specifiedClasses()) {
       // TODO: Class.forName() expects a binary name but doc.qualifiedName()
       // returns a fully qualified name.  I do not know a good way to convert
@@ -230,7 +234,7 @@ public class OptionsDoclet {
         continue;
       }
 
-      Class<?> clazz;
+      @PolyDet Class<?> clazz;
       try {
         @BinaryName String className = doc.qualifiedName();
         clazz = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
@@ -242,9 +246,9 @@ public class OptionsDoclet {
 
       if (needsInstantiation(clazz)) {
         try {
-          Constructor<?> c = clazz.getDeclaredConstructor();
+          @PolyDet Constructor<?> c = clazz.getDeclaredConstructor();
           c.setAccessible(true);
-          objs.add(c.newInstance(new Object[0]));
+          objs.add(c.newInstance(new @PolyDet("use") Object @PolyDet[0]));
         } catch (Exception e) {
           e.printStackTrace();
           return false;
@@ -259,15 +263,15 @@ public class OptionsDoclet {
       return false;
     }
 
-    Object[] objarray = objs.toArray();
-    Options options = new Options(objarray);
+    @PolyDet("use") Object @PolyDet[] objarray = objs.toArray();
+    Options options = new @PolyDet Options(objarray);
     if (options.getOptions().size() < 1) {
       System.out.println("Error: no @Option-annotated fields found");
       return false;
     }
 
     OptionsDoclet o = new OptionsDoclet(root, options);
-    String[] @MinLen(1) [] rootOptions = root.options();
+    @PolyDet("use") String @PolyDet("use")[] @MinLen(1) @PolyDet[] rootOptions = root.options();
     o.setOptions(rootOptions);
     o.processJavadoc();
     try {
@@ -407,11 +411,12 @@ public class OptionsDoclet {
    * @param options the command-line options to parse: a list of 1- or 2-element arrays
    */
   // @SuppressWarnings("index") // dependent: os[1] is legal when optionLength(os[0])==2
+  @SuppressWarnings("determinism:assignment.type.incompatible")
   public void setOptions(String[] @MinLen(1) [] options) {
     String outFilename = null;
     File destDir = null;
     for (int oi = 0; oi < options.length; oi++) {
-      String[] os = options[oi];
+      @PolyDet String @PolyDet("up")[] os = options[oi];
       String opt = os[0].toLowerCase();
       if (opt.equals("-docfile")) {
         assert os.length == 2 : "@AssumeAssertion(value): dependent: optionLength(\"docfile\")==2";
@@ -511,6 +516,7 @@ public class OptionsDoclet {
    * @throws Exception if there is trouble reading files
    */
   @RequiresNonNull("docFile")
+  @SuppressWarnings("determinism:argument.type.incompatible")
   private String newDocFileText() throws Exception {
     StringJoiner b = new StringJoiner(lineSep);
     BufferedReader doc = Files.newBufferedReader(docFile.toPath(), UTF_8);
@@ -556,6 +562,7 @@ public class OptionsDoclet {
   // HTML and Javadoc processing methods
 
   /** Adds Javadoc info to each option in {@code options.getOptions()}. */
+  @SuppressWarnings("determinism:method.invocation.invalid")
   public void processJavadoc() {
     for (Options.OptionInfo oi : options.getOptions()) {
       @SuppressWarnings("signature") // non-array non-primitive => Class.getName(): @BinaryName
@@ -634,8 +641,9 @@ public class OptionsDoclet {
    * @param refillWidth the number of columns to fit the text into, by breaking lines
    * @return the HTML documentation for the underlying Options instance
    */
+  @SuppressWarnings("determinism:method.invocation.invalid")
   public String optionsToHtml(int refillWidth) {
-    StringJoiner b = new StringJoiner(lineSep);
+    @PolyDet StringJoiner b = new @PolyDet StringJoiner(lineSep);
 
     ClassDoc[] classes = root.classes();
     if (includeClassDoc && classes.length > 0) {
@@ -715,6 +723,7 @@ public class OptionsDoclet {
    * @param refillWidth the number of columns to fit the text into, by breaking lines
    * @return the options documented in HTML format
    */
+  @SuppressWarnings("determinism:method.invocation.invalid")
   private String optionListToHtml(
       List<Options.OptionInfo> optList, int padding, int firstLinePadding, int refillWidth) {
     StringJoiner b = new StringJoiner(lineSep);

@@ -41,6 +41,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.checker.determinism.qual.*;
 
 /**
  * The Options class:
@@ -423,7 +424,8 @@ public class Options {
      */
     @SuppressWarnings({
       "nullness:argument.type.incompatible", // field is static when object is null
-      "interning:argument.type.incompatible" // interning is not relevant to the call
+      "interning:argument.type.incompatible", // interning is not relevant to the call
+            "determinism:invariant.cast.unsafe"
     })
     OptionInfo(
         Field field,
@@ -488,7 +490,7 @@ public class Options {
           defaultStr = null;
         }
         @SuppressWarnings("unchecked")
-        List<Object> defaultObjAsList = (List<Object>) defaultObj;
+        @PolyDet List<Object> defaultObjAsList = (List<Object>) defaultObj;
         this.list = defaultObjAsList;
         // System.out.printf ("list default = %s%n", list);
         Type[] listTypeArgs = pt.getActualTypeArguments();
@@ -669,6 +671,7 @@ public class Options {
    * @param usageSynopsis a synopsis of how to call your program
    * @param args the classes whose options to process
    */
+  @SuppressWarnings({"determinism:invalid.array.component.type","determinism:argument.type.incompatible","determinism:method.invocation.invalid"})
   public Options(String usageSynopsis, @UnknownInitialization Object... args) {
 
     if (args.length == 0) {
@@ -834,6 +837,7 @@ public class Options {
    * @return this element's annotation for the specified annotation type if present on this element,
    *     else null
    */
+  @SuppressWarnings("determinism:argument.type.incompatible")
   private static <T extends Annotation> @Nullable T safeGetAnnotation(
       Field f, Class<T> annotationClass) {
     @Nullable T annotation;
@@ -857,6 +861,7 @@ public class Options {
   }
 
   /** Print the classpath. */
+  @SuppressWarnings("determinism:argument.type.incompatible")
   static void printClassPath() {
     URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
     if (sysLoader == null) {
@@ -903,9 +908,10 @@ public class Options {
    * @return all non-option arguments
    * @throws ArgException if the command line contains unknown option or misused options
    */
+  @SuppressWarnings("determinism:method.invocation.invalid")
   public String[] parse(String[] args) throws ArgException {
 
-    List<String> nonOptions = new ArrayList<>();
+    @PolyDet List<@PolyDet("use") String> nonOptions = new @PolyDet ArrayList<>();
     // If true, then "--" has been seen and any argument starting with "-"
     // is processed as an ordinary argument, not as an option.
     boolean ignoreOptions = false;
@@ -985,7 +991,7 @@ public class Options {
         ii++;
       }
     }
-    String[] result = nonOptions.toArray(new String[nonOptions.size()]);
+    @PolyDet("use") String @PolyDet[] result = nonOptions.toArray(new @PolyDet("down") String @PolyDet[nonOptions.size()]);
     return result;
   }
 
@@ -1000,12 +1006,13 @@ public class Options {
    * @return a string array analogous to the argument to {@code main}.
    */
   // TODO: should this throw some exceptions?
+  @SuppressWarnings("determinism:argument.type.incompatible")
   public static String[] tokenize(String args) {
 
     // Split the args string on whitespace boundaries accounting for quoted
     // strings.
     args = args.trim();
-    List<String> argList = new ArrayList<>();
+    @PolyDet List<@PolyDet("down") String> argList = new @PolyDet ArrayList<>();
     String arg = "";
     for (int ii = 0; ii < args.length(); ii++) {
       char ch = args.charAt(ii);
@@ -1036,7 +1043,7 @@ public class Options {
       argList.add(arg);
     }
 
-    String[] argsArray = argList.toArray(new String[argList.size()]);
+    @PolyDet("down") String @PolyDet[] argsArray = argList.toArray(new @PolyDet("down") String @PolyDet[argList.size()]);
     return argsArray;
   }
 
@@ -1054,9 +1061,10 @@ public class Options {
    * @return all non-option arguments
    * @see #parse(String[])
    */
+  @SuppressWarnings("determinism:argument.type.incompatible")
   public String[] parse(String message, String[] args) {
 
-    String[] nonOptions = null;
+    @PolyDet("use") String @PolyDet[] nonOptions = null;
 
     try {
       nonOptions = parse(args);
@@ -1087,7 +1095,7 @@ public class Options {
    */
   public String[] parse(boolean showUsageOnError, String[] args) {
 
-    String[] nonOptions = null;
+    @PolyDet("use") String @PolyDet[] nonOptions = null;
 
     try {
       nonOptions = parse(args);
@@ -1115,6 +1123,7 @@ public class Options {
    *
    * @param ps where to print usage information
    */
+  @SuppressWarnings({"determinism:argument.type.incompatible","determinism:method.invocation.invalid"})
   public void printUsage(PrintStream ps) {
     hasListOption = false;
     if (usageSynopsis != null) {
@@ -1155,6 +1164,7 @@ public class Options {
    *     unpublicized. If empty and option groups are not being used, will return usage for all
    *     options that are not unpublicized.
    */
+  @SuppressWarnings({"determinism:argument.type.incompatible","determinism:method.invocation.invalid"})
   public String usage(boolean showUnpublicized, String... groupNames) {
     if (!hasGroups) {
       if (groupNames.length > 0) {
@@ -1242,6 +1252,7 @@ public class Options {
    * @param showUnpublicized if true, include unpublicized options in the computation
    * @return the length of the longest synopsis message in a list of options
    */
+  @SuppressWarnings("determinism:return.type.incompatible")
   private int maxOptionLength(List<OptionInfo> optList, boolean showUnpublicized) {
     int maxLength = 0;
     for (OptionInfo oi : optList) {
@@ -1457,14 +1468,14 @@ public class Options {
    * @return a value, whose printed representation is {@code argValue}
    * @throws ArgException if the user supplied an incorrect string (contained in {@code argValue})
    */
-  @SuppressWarnings("nullness") // static method, so null first arg is OK: oi.factory
+  @SuppressWarnings({"nullness","determinism:return.type.incompatible"}) // static method, so null first arg is OK: oi.factory
   private @NonNull Object getRefArg(OptionInfo oi, String argName, String argValue)
       throws ArgException {
 
     Object val;
     try {
       if (oi.constructor != null) {
-        val = oi.constructor.newInstance(new Object[] {argValue});
+        val = oi.constructor.newInstance(new @PolyDet("use") Object @PolyDet[] {argValue});
       } else if (oi.baseType.isEnum()) {
         @SuppressWarnings({"unchecked", "rawtypes"})
         Object tmpVal = getEnumValue((Class<Enum>) oi.baseType, argValue);
@@ -1496,6 +1507,7 @@ public class Options {
    * @param name the name of the constant to return
    * @return the enum constant of the specified enum type with the specified name
    */
+  @SuppressWarnings("determinism:return.type.incompatible")
   private <T extends Enum<T>> T getEnumValue(Class<T> enumType, String name) {
     T[] constants = enumType.getEnumConstants();
     if (constants == null) {
@@ -1733,9 +1745,10 @@ public class Options {
    * @param m a map whose keyset will be sorted
    * @return a sorted version of m.keySet()
    */
+  @SuppressWarnings("determinism:type.argument.type.incompatible")
   private static <K extends Comparable<? super K>, V> Collection<@KeyFor("#1") K> sortedKeySet(
       Map<K, V> m) {
-    ArrayList<@KeyFor("#1") K> theKeys = new ArrayList<>(m.keySet());
+    @PolyDet ArrayList<@KeyFor("#1") K> theKeys = new @PolyDet ArrayList<>(m.keySet());
     Collections.sort(theKeys);
     return theKeys;
   }
