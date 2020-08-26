@@ -451,7 +451,7 @@ public class OptionsDoclet {
    * @param clazz the class whose values will be created by command-line arguments
    * @return true if the class needs to be instantiated before command-line arguments are parsed
    */
-  @SuppressWarnings("determinism:method.invocation.invalid")  // Iteration over OrderNonDet collection
+  @SuppressWarnings("determinism:method.invocation.invalid")  // Iteration over OrderNonDet collection for searching
   private static boolean needsInstantiation(Class<?> clazz) {
     for (Field f : clazz.getDeclaredFields()) {
       if (f.isAnnotationPresent(Option.class) && !Modifier.isStatic(f.getModifiers())) {

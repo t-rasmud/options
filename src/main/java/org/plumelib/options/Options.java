@@ -425,7 +425,7 @@ public class Options {
     @SuppressWarnings({
       "nullness:argument.type.incompatible", // field is static when object is null
       "interning:argument.type.incompatible", // interning is not relevant to the call
-            "determinism:assignment.type.incompatible"  // Potential true positive; defaultStr is assigned Object.toString()
+            "determinism:assignment.type.incompatible"  // true positive; defaultStr is assigned Object.toString()
     })
     OptionInfo(
         Field field,
@@ -671,9 +671,8 @@ public class Options {
    * @param usageSynopsis a synopsis of how to call your program
    * @param args the classes whose options to process
    */
-  @SuppressWarnings({"determinism:argument.type.incompatible", // Potential true positive; GerDeclaredFields returns OrderNonDet resulting in OrderNonDet printing
-          "determinism:method.invocation.invalid",
-          "determinism:nondeterministic.tostring"  // Potential true positive; Printing Object.toString()
+  @SuppressWarnings({"determinism:argument.type.incompatible",  // true positive; GetDeclaredFields returns OrderNonDet resulting in OrderNonDet printing
+          "determinism:nondeterministic.tostring"  // true positive; Printing Object.toString()
   })
   public Options(String usageSynopsis, @UnknownInitialization Object... args) {
 
@@ -702,7 +701,7 @@ public class Options {
       if (mainClass == Void.TYPE) {
         mainClass = clazz;
       }
-      @Det Field[] fields = clazz.getDeclaredFields();
+      @Det Field @OrderNonDet[] fields = clazz.getDeclaredFields();
 
       for (Field f : fields) {
         try {
@@ -1575,7 +1574,7 @@ public class Options {
    * @return a command line that can be tokenized with {@link #tokenize}, containing the current
    *     setting for each option
    */
-  @SuppressWarnings("determinism:nondeterministic.tostring")
+  @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; Printing Object.toString(): return type of fieldGet
   public String settings(boolean showUnpublicized) {
     StringJoiner out = new StringJoiner(lineSeparator);
 
@@ -1639,7 +1638,7 @@ public class Options {
      * @param args the arguments to be formatted by the format string
      */
     @FormatMethod
-    @SuppressWarnings("determinism:nondeterministic.tostring")
+    @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; Printing Object.toString()
     public ArgException(String format, @Nullable Object... args) {
       super(String.format(format, args));
     }
