@@ -425,7 +425,7 @@ public class Options {
     @SuppressWarnings({
       "nullness:argument.type.incompatible", // field is static when object is null
       "interning:argument.type.incompatible", // interning is not relevant to the call
-            "determinism:assignment.type.incompatible"  // true positive; defaultStr is assigned Object.toString()
+      "determinism:assignment.type.incompatible"  // true positive; defaultStr is assigned Object.toString()
     })
     OptionInfo(
         Field field,
@@ -671,8 +671,9 @@ public class Options {
    * @param usageSynopsis a synopsis of how to call your program
    * @param args the classes whose options to process
    */
-  @SuppressWarnings({"determinism:argument.type.incompatible",  // true positive; GetDeclaredFields returns OrderNonDet resulting in OrderNonDet printing
-          "determinism:nondeterministic.tostring"  // true positive; Printing Object.toString()
+    @SuppressWarnings({"determinism:argument.type.incompatible","determinism:method.invocation.invalid",  // true positive; user output: GetDeclaredFields returns OrderNonDet resulting in OrderNonDet printing.
+	      // The code depends on the (undocumented) fact that getDeclaredFields returns fields in their order of declaration.  The code will break if the fields are returned in a different order.
+	      "determinism:nondeterministic.tostring"  // true positive; logging: Printing Object.toString() for `objNonRaw`
   })
   public Options(String usageSynopsis, @UnknownInitialization Object... args) {
 
@@ -1638,7 +1639,7 @@ public class Options {
      * @param args the arguments to be formatted by the format string
      */
     @FormatMethod
-    @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; Printing Object.toString()
+    @SuppressWarnings("determinism:nondeterministic.tostring")  // printing Object.toString(); need analysis of call sites to determine whether this is a true positive
     public ArgException(String format, @Nullable Object... args) {
       super(String.format(format, args));
     }
