@@ -1639,7 +1639,7 @@ public class Options {
      * @param args the arguments to be formatted by the format string
      */
     @FormatMethod
-    @SuppressWarnings("determinism:nondeterministic.tostring")  // printing Object.toString(); need analysis of call sites to determine whether this is a true positive
+    @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; printing Object.toString(): need analysis of call sites to determine whether this is a true positive, but I see some examples at call sites
     public ArgException(String format, @Nullable Object... args) {
       super(String.format(format, args));
     }
