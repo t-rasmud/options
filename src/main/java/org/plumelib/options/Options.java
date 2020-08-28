@@ -425,7 +425,7 @@ public class Options {
     @SuppressWarnings({
       "nullness:argument.type.incompatible", // field is static when object is null
       "interning:argument.type.incompatible", // interning is not relevant to the call
-      "determinism:assignment.type.incompatible"  // true positive; defaultStr is assigned Object.toString()
+      "determinism:assignment.type.incompatible"  // true positive; Object.toString not overridden: defaultStr is assigned defaultObj.toString()
     })
     OptionInfo(
         Field field,
@@ -1575,7 +1575,7 @@ public class Options {
    * @return a command line that can be tokenized with {@link #tokenize}, containing the current
    *     setting for each option
    */
-  @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; Printing Object.toString(): return type of fieldGet
+  @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; user output: Printing Object.toString(): return type of fieldGet
   public String settings(boolean showUnpublicized) {
     StringJoiner out = new StringJoiner(lineSeparator);
 
@@ -1639,7 +1639,7 @@ public class Options {
      * @param args the arguments to be formatted by the format string
      */
     @FormatMethod
-    @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; printing Object.toString(): need analysis of call sites to determine whether this is a true positive, but I see some examples at call sites
+    @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; user output: printing Object.toString(): need analysis of all call sites to find all positives, but I see some examples at call sites
     public ArgException(String format, @Nullable Object... args) {
       super(String.format(format, args));
     }
