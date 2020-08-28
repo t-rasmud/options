@@ -671,7 +671,7 @@ public class Options {
    * @param usageSynopsis a synopsis of how to call your program
    * @param args the classes whose options to process
    */
-    @SuppressWarnings({"determinism:argument.type.incompatible","determinism:method.invocation.invalid",  // true positive; user output: GetDeclaredFields returns OrderNonDet resulting in OrderNonDet printing.
+    @SuppressWarnings({"determinism:argument.type.incompatible","determinism:method.invocation.invalid",  // true positive; user output; collection ordering: GetDeclaredFields returns OrderNonDet resulting in OrderNonDet printing.
 	      // The code depends on the (undocumented) fact that getDeclaredFields returns fields in their order of declaration.  The code will break if the fields are returned in a different order.
 	      "determinism:nondeterministic.tostring"  // true positive; logging: Printing Object.toString() for `objNonRaw`
   })
@@ -1575,7 +1575,7 @@ public class Options {
    * @return a command line that can be tokenized with {@link #tokenize}, containing the current
    *     setting for each option
    */
-  @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; user output: Printing Object.toString(): return type of fieldGet
+  @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; user output; Object.toString not overridden: return type of fieldGet
   public String settings(boolean showUnpublicized) {
     StringJoiner out = new StringJoiner(lineSeparator);
 
@@ -1639,7 +1639,7 @@ public class Options {
      * @param args the arguments to be formatted by the format string
      */
     @FormatMethod
-    @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; user output: printing Object.toString(): need analysis of all call sites to find all positives, but I see some examples at call sites
+    @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; user output; Object.toString not overridden: need analysis of all call sites to find all positives, but I see some examples at call sites
     public ArgException(String format, @Nullable Object... args) {
       super(String.format(format, args));
     }
