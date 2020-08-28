@@ -425,7 +425,7 @@ public class Options {
     @SuppressWarnings({
       "nullness:argument.type.incompatible", // field is static when object is null
       "interning:argument.type.incompatible", // interning is not relevant to the call
-      "determinism:assignment.type.incompatible"  // true positive; Object.toString not overridden: defaultStr is assigned defaultObj.toString()
+      "determinism:assignment.type.incompatible"  // true positive; user output; Object.toString not overridden: defaultStr is assigned defaultObj.toString()
     })
     OptionInfo(
         Field field,
