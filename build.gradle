@@ -94,7 +94,7 @@ checkerFramework {
     '-Werror',
     //'-AcheckPurityAnnotations',
     '-ArequirePrefixInWarningSuppressions',
-    '-AwarnUnneededSuppressions',
+    '-AwarnUnneededSuppressions', '-AwarnUnneededSuppressionsExceptions=purity|method.guarantee.violated',
     '-AsuppressWarnings=determinism:override.receiver.invalid,determinism:invalid.upper.bound.on.type.argument',
     // '-AusePolyDefault',
     // `com.sun.javadoc` is deprecated and superseded by `jdk.javadoc.doclet`.
