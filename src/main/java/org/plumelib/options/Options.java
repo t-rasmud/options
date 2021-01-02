@@ -425,8 +425,8 @@ public class Options {
     @SuppressWarnings({
       "nullness:argument.type.incompatible", // field is static when object is null
       "interning:argument.type.incompatible", // interning is not relevant to the call
-      "determinism:assignment.type.incompatible"  // true positive; user output; Object.toString not overridden: defaultStr is assigned defaultObj.toString()
     })
+    // true positive; user output; Object.toString not overridden: defaultStr is assigned defaultObj.toString()
     OptionInfo(
         Field field,
         Option option,
@@ -671,10 +671,9 @@ public class Options {
    * @param usageSynopsis a synopsis of how to call your program
    * @param args the classes whose options to process
    */
-    @SuppressWarnings({"determinism:argument.type.incompatible","determinism:method.invocation.invalid",  // true positive; user output; collection ordering: GetDeclaredFields returns OrderNonDet resulting in OrderNonDet printing.
-	      // The code depends on the (undocumented) fact that getDeclaredFields returns fields in their order of declaration.  The code will break if the fields are returned in a different order.
-	      "determinism:nondeterministic.tostring"  // true positive; logging: Printing Object.toString() for `objNonRaw`
-  })
+  // true positive; user output; collection ordering: GetDeclaredFields returns OrderNonDet resulting in OrderNonDet printing.
+  // The code depends on the (undocumented) fact that getDeclaredFields returns fields in their order of declaration.  The code will break if the fields are returned in a different order.
+  // true positive; logging: Printing Object.toString() for `objNonRaw`
   public Options(String usageSynopsis, @UnknownInitialization Object... args) {
 
     if (args.length == 0) {
@@ -1575,7 +1574,7 @@ public class Options {
    * @return a command line that can be tokenized with {@link #tokenize}, containing the current
    *     setting for each option
    */
-  @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; user output; Object.toString not overridden: return type of fieldGet
+  // true positive; user output; Object.toString not overridden: return type of fieldGet
   public String settings(boolean showUnpublicized) {
     StringJoiner out = new StringJoiner(lineSeparator);
 
@@ -1639,7 +1638,7 @@ public class Options {
      * @param args the arguments to be formatted by the format string
      */
     @FormatMethod
-    @SuppressWarnings("determinism:nondeterministic.tostring")  // true positive; user output; Object.toString not overridden: need analysis of all call sites to find all positives, but I see some examples at call sites
+    // true positive; user output; Object.toString not overridden: need analysis of all call sites to find all positives, but I see some examples at call sites
     public ArgException(String format, @Nullable Object... args) {
       super(String.format(format, args));
     }
