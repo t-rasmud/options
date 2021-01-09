@@ -64,7 +64,7 @@ dependencies {
   errorproneJavac("com.google.errorprone:javac:9+181-r4173-1")
 }
 tasks.withType(JavaCompile).configureEach {
-  options.compilerArgs << "-Xlint:all,-processing" << "-Werror"
+  options.compilerArgs << "-Xlint:all,-processing"
   options.errorprone {
     disable("ReferenceEquality") // Use Interning Checker instead
     disable("StringSplitter") // obscure case isn't likely
@@ -91,7 +91,6 @@ checkerFramework {
   ]
   extraJavacArgs = [
     '-Aannotations', '-Anolocations', // for AnnotationStatistics
-    '-Werror',
     //'-AcheckPurityAnnotations',
     '-ArequirePrefixInWarningSuppressions',
     '-AwarnUnneededSuppressions',
@@ -103,7 +102,7 @@ checkerFramework {
     //  `jdk.javadoc.doclet` only exists in Java 9 and later, so switching to it means losing support for Java 8.
     // Classes are imported by OptionsDoclet and therefore this warning can't be suppressed there.
     '-Xlint:-removal',
-    '-Xmaxerrs','10000',
+    '-Xmaxwarns','10000',
     '-Awarns',
   ]
 }
