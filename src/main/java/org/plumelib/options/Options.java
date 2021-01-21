@@ -1502,6 +1502,7 @@ public class Options {
    * @param name the name of the constant to return
    * @return the enum constant of the specified enum type with the specified name
    */
+  @SuppressWarnings({"determinism:method.invocation.invalid", "determinism:return.type.incompatible"})  // Iteration over OrderNonDet `constants` for searching
   private <T extends Enum<T>> T getEnumValue(Class<T> enumType, String name) {
     T[] constants = enumType.getEnumConstants();
     if (constants == null) {

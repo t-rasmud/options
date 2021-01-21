@@ -594,7 +594,10 @@ public class OptionsDoclet {
    *
    * @param oi the enum option whose Javadoc to read
    */
-  @SuppressWarnings("ModifyCollectionInEnhancedForLoop")
+  @SuppressWarnings({
+          "ModifyCollectionInEnhancedForLoop",
+          "determinism:method.invocation.invalid" // Iteration over OrderNonDet `constants` for creating another OrderNonDet collection
+  })
   private void processEnumJavadoc(Options.OptionInfo oi) {
     @Det Enum<?>[] constants = (Enum<?>[]) oi.baseType.getEnumConstants();
     if (constants == null) {
@@ -603,7 +606,7 @@ public class OptionsDoclet {
 
     oi.enumJdoc = new LinkedHashMap<>();
 
-    for (Enum<?> constant : constants) {
+    for (@NonDet Enum<?> constant : constants) {
       assert oi.enumJdoc != null : "@AssumeAssertion(nullness): bug in flow?";
       oi.enumJdoc.put(constant.name(), "");
     }
